@@ -53,7 +53,7 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
     
     let xmlhttp = new XMLHttpRequest(); 
     xmlhttp.open("POST", url);
-    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.setRequestHeader("Content-Type", "application/json", 'Accept', 'application/json');
     xmlhttp.send(JSON.stringify(objects));
 }
 
@@ -114,7 +114,6 @@ function drawNextFrame() {
 // the canvas
 function drawFrame() {
     if (drawNext) {
-        console.log("render")
         renderFrame();
         drawNext = false;
     }
@@ -266,34 +265,18 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
                           'radius':10});
 });
 
-
-function getUpdate() {
+function update() {
+    //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
     fetch("http://127.0.0.1:5000/world")
         .then(function(response) {
         return response.json();
     })
     .then(function(myJson) {
-        //console.log(JSON.stringify(myJson));
-        // for (let key in myJson) {
-        //     //console.log(i, myJson[key]);
-        //     world[key] = myJson[key];
-        // }
-        if (Object.toJSON(user1) != Object.toJSON(user2)) {
+        if (JSON.stringify(world) != JSON.stringify(myJson)) {
             world = myJson;
-            console.log(world)
             drawNextFrame();
         }
-        
-        console.log("---------------------");
     });
-}
-
-
-function update() {
-    //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
-    //setInterval(getUpdate, 5000);
-    getUpdate();
-    
     drawFrame();
 }
 
