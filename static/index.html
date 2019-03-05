@@ -50,6 +50,11 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
     //XXX: POST to a URL
     //XXX: set the mimetype and the accept headers!
     // Remember to use application/json !
+    
+    let xmlhttp = new XMLHttpRequest(); 
+    xmlhttp.open("POST", url);
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    xmlhttp.send(JSON.stringify(objects));
 }
 
 
@@ -109,6 +114,7 @@ function drawNextFrame() {
 // the canvas
 function drawFrame() {
     if (drawNext) {
+        console.log("render")
         renderFrame();
         drawNext = false;
     }
@@ -136,9 +142,10 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    drawNextFrame(); // (but should we?)
+    //drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just  modified!
-
+    let url = "http://127.0.0.1:5000/entity/" + entity;
+    sendJSONXMLHTTPRequest(url, world[entity], null)
 }
 
 var counter = 0;
@@ -260,8 +267,33 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 });
 
 
+function getUpdate() {
+    fetch("http://127.0.0.1:5000/world")
+        .then(function(response) {
+        return response.json();
+    })
+    .then(function(myJson) {
+        //console.log(JSON.stringify(myJson));
+        // for (let key in myJson) {
+        //     //console.log(i, myJson[key]);
+        //     world[key] = myJson[key];
+        // }
+        if (Object.toJSON(user1) != Object.toJSON(user2)) {
+            world = myJson;
+            console.log(world)
+            drawNextFrame();
+        }
+        
+        console.log("---------------------");
+    });
+}
+
+
 function update() {
     //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
+    //setInterval(getUpdate, 5000);
+    getUpdate();
+    
     drawFrame();
 }
 
