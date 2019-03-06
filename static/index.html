@@ -322,10 +322,13 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
                           'radius':1});
 });
 
+busy = false;
 function update() {
     //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
     let url = baseUrl + "world";
-    fetch(url)
+    if(!busy){
+        busy = true;
+        fetch(url)
         .then(function(response) {
         return response.json();
     })
@@ -334,8 +337,11 @@ function update() {
             world = myJson;
             drawNextFrame();
         }
+        busy = false;
     });
     drawFrame();
+    }
+    
 }
 
 // 30 frames per second
