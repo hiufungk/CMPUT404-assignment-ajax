@@ -13,3 +13,4 @@ Contributors / Licensing
 Generally everything is LICENSE'D under the Apache 2 license by Abram Hindle.
 
 
+random colour: 5 March 2019 https://www.paulirish.com/2009/random-hex-color-code-snippets/

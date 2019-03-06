@@ -58,7 +58,6 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
 }
 
 function sendEntity(url, entity) {
-    console.log("sendEntity");
     fetch(url, {
         method: "POST",
 //        mode: "same-origin",
@@ -107,12 +106,52 @@ function clearFrame() {
 
 }
 
+//draw a X for the end
+function drawStart(context,entity) {
+    with(context) {
+        beginPath();              
+        let x = entity["x"];;
+        let y = entity["y"];;
+        let length = 10;
+        fillStyle = entity["colour"];
+        strokeStyle = fillStyle;
+        moveTo(x-length,y-length);
+        lineTo(x+length,y+length);
+        moveTo(x+length,y-length);
+        lineTo(x-length,y+length);
+        stroke();                              
+    }
+}
+
+//draw a + for the end
+function drawEnd(context,entity) {
+    with(context) {
+        beginPath();              
+        let x = entity["x"];
+        let y = entity["y"];
+        let length = 15;
+        fillStyle = entity["colour"];
+        strokeStyle = fillStyle;
+        moveTo(x,y-length);
+        lineTo(x,y+length);
+        moveTo(x-length,y);
+        lineTo(x+length,y);
+        stroke();                                
+    }
+}
+
 // This actually draws the frame
 function renderFrame() {
     clearFrame();
     for (var key in world) {
         var entity = world[key];
-        drawCircle(context,prepEntity(entity));
+        if(entity["type"] == "start") {
+            drawStart(context,prepEntity(entity));
+        } else if(entity["type"] == "end") {
+            drawEnd(context,prepEntity(entity));
+        } else {
+            drawCircle(context,prepEntity(entity));
+        }
     }
 }
 
@@ -157,10 +196,8 @@ function addEntity(entity, data) {
     world[entity] = data;
     //drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just  modified!
-    //let url = "http://127.0.0.1:5000/entity/" + entity;
+    
     let url = baseUrl + "entity/" + entity;
-    //sendJSONXMLHTTPRequest(url, world[entity], null)
-    console.log("addEntity");
     sendEntity(url, world[entity]);
 }
 
@@ -269,23 +306,25 @@ mouse = (function() {
 
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
+let currentColour;
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    //random colour snippet from 5 March 2019 https://www.paulirish.com/2009/random-hex-color-code-snippets/
+    currentColour = '#' + Math.floor(Math.random()*16777215).toString(16);
+    addEntityWithoutName({'x':x,'y':y,'colour':'blue', "type": "start"});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'red', "type": "end"});
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'green',
-                          'radius':10});
+    addEntityWithoutName({'x':x,'y':y,'colour':currentColour,
+                          'radius':1});
 });
 
 function update() {
     //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
     let url = baseUrl + "world";
-    console.log("updtate:", url)
     fetch(url)
         .then(function(response) {
         return response.json();
