@@ -57,6 +57,19 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
     xmlhttp.send(JSON.stringify(objects));
 }
 
+function sendEntity(url, entity) {
+    console.log("sendEntity");
+    fetch(url, {
+        method: "POST",
+//        mode: "same-origin",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(entity)
+    })
+}
+
 
 world = {};
 
@@ -138,13 +151,17 @@ function getPosition(e) {
 	}
 }
 
+baseUrl = "http://"+location.hostname+":5000/";
 
 function addEntity(entity, data) {
     world[entity] = data;
     //drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just  modified!
-    let url = "http://127.0.0.1:5000/entity/" + entity;
-    sendJSONXMLHTTPRequest(url, world[entity], null)
+    //let url = "http://127.0.0.1:5000/entity/" + entity;
+    let url = baseUrl + "entity/" + entity;
+    //sendJSONXMLHTTPRequest(url, world[entity], null)
+    console.log("addEntity");
+    sendEntity(url, world[entity]);
 }
 
 var counter = 0;
@@ -267,7 +284,9 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 
 function update() {
     //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
-    fetch("http://127.0.0.1:5000/world")
+    let url = baseUrl + "world";
+    console.log("updtate:", url)
+    fetch(url)
         .then(function(response) {
         return response.json();
     })
